@@ -11,7 +11,7 @@
     "type": "git",
     "url": "exemple2live"
   },
-  "author": "Adrien Ribeiro",
+  "author": "Adrien Ribeiro et Melissa Pegas",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
