@@ -1,23 +1,30 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import bcryptjs from 'bcryptjs'
 
-const SECRET_KEY: string | undefined = process.env.SECRET_KEY;
+// Définition du nombre de "rounds" pour le salage des mots de passe.
+// Plus le nombre est élevé, plus le hachage sera sécurisé, mais il sera aussi plus lent.
+const saltRounds = 10;
 
-export function generateToken(payload: object): string {
 
-    if (!SECRET_KEY) {
-        throw new Error("JWT_SECRET non présente dans les variables d'environnement")
-    }
-
-    return jwt.sign(payload, SECRET_KEY, { expiresIn: '10000h' })
+/**
+ * Fonction pour hacher un mot de passe.
+ * 
+ * @param password - Le mot de passe brut à hacher.
+ * @returns Une promesse qui résout une chaîne de caractères représentant le mot de passe haché.
+ */
+export async function hashPassword(password: string): Promise<string> {
+    //Utilise bcrypt pour générer un hachage sécurisé du mot de passe.
+    return bcryptjs.hash(password, saltRounds);
 }
 
-export function verifyToken(token: string): string | JwtPayload | null {
-    if (!SECRET_KEY) {
-        throw new Error("JWT_SECRET non présente dans les variables d'environnement")
-    }
-    try {
-        return jwt.verify(token, SECRET_KEY)
-    } catch (err: any) {
-        return null;
-    }
+/**
+ * Fonction pour vérifier si un mot de passe correspond à un hachage donné.
+ * 
+ * @param password - Le mot de passe brut à vérifier.
+ * @param hash - Le hachage avec lequel comparer le mot de passe.
+ * @returns Une promesse qui résout un booléen indiquant si le mot de passe correspond au hachage.
+ */
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+    //Compare le mot de passe brut avec le hachage en utilisant bcrypt.
+    //Retourne true si les deux correspondent, sinon false.
+    return bcryptjs.compare(password, hash);
 }

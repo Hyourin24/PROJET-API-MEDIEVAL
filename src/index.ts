@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
+import authRoutes from "./routes/authRoutes";
 
 
 
@@ -30,6 +31,7 @@ const connectDB = async () => {
 connectDB();
 
 //TODO ajouter routes ici
+app.use('/', authRoutes);
 
 
 
