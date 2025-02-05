@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/create', createClient);
 router.put('/modify/clients/:id', verifyTokenMiddleware, modifyClient);
-router.put('/modify/actif/:id',  verifyTokenMiddleware, isAdmin, modifyClientActif)
+router.put('/modify/actif/:id', isAdmin, verifyTokenMiddleware, modifyClientActif)
 
 
 export default router;

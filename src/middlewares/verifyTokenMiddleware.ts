@@ -12,7 +12,7 @@ export function verifyTokenMiddleware(req: Request, res: Response, next: NextFun
     }
     const cookie = req.headers.cookie;
     if (!cookie) {
-        res.status(401).json({ message: "Access denied. Cookie missing" });
+        res.status(401).json({ message: "Access denies. COokie missing" });
         return;
     }
     const token = cookie.split('=')[1];
@@ -34,6 +34,4 @@ export function verifyTokenMiddleware(req: Request, res: Response, next: NextFun
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
-
-     next();
 }

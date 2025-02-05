@@ -122,6 +122,7 @@ export async function modifyClientActif(req:Request, res: Response){
     }
 }  
 
-function getUserIdFromPayload(arg0: string) {
-    throw new Error('Function not implemented.');
+export function getUserIdFromPayload(payloadJson: string): string | null {
+    const payload = JSON.parse(payloadJson) || null;
+    return payload.id || null
 }

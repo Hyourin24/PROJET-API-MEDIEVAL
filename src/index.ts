@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes";
 import clientRoutes from "./routes/clientRoutes";
+import cookieParser from "cookie-parser";
 
 
 //Création serveur express
@@ -33,6 +34,7 @@ connectDB();
 //TODO ajouter routes ici
 app.use('/', authRoutes);
 app.use('/', clientRoutes);
+app.use(cookieParser());
 
 
 
