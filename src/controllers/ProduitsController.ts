@@ -38,10 +38,6 @@ export async function modifyProduit(req: Request, res: Response) {
     try {
         const { id } = req.params; 
         const { nom, description, stock } = req.body;
-        if (!id) {
-            res.status(400).json({ message: 'ID requis!' })
-            return
-        }
         if (!nom || !description || !stock) {
             res.status(400).json({ message: 'Les champds doivent être modifiés' })
         }
@@ -52,16 +48,40 @@ export async function modifyProduit(req: Request, res: Response) {
             { new: true, runValidators: true } // Retourner le nouvel utilisateur et valider les données 
         ) 
 
-        const updatedUserData = {
-            nom,
-            description,
-            stock
-        }
         if (!updatedUser) {
             res.status(404).json({ message: 'Produit non trouvé' })
             return
         }
-        res.status(200).json({ message: 'Produit mis à jour avec succès', data: updatedUserData })
+        updatedUser.nom = nom;
+        updatedUser.description = description;
+        updatedUser.stock = stock;
+        const ProduitModifié = await updatedUser.save();
+        res.status(200).json({ message: 'Produit mis à jour avec succès', updatedUser: ProduitModifié })
+
+    } catch (err: any) {
+        res.status(500).json({ message: 'Erreur interne', error: err.message })
+    }
+}
+
+export async function deleteProduits(req: Request, res: Response) {
+    try {
+        const { id } = req.params; 
+        const { nom, description, stock } = req.body;
+        //Mise à jour des champs
+        const deletedUser = await Produits.findByIdAndDelete(
+            id, //ID de l'utilisateur à mettre à jour
+            { completed: true}, //Champs à changer
+        ) 
+
+        if (!deletedUser) {
+            res.status(404).json({ message: 'Produit non trouvé' })
+            return
+        }
+        deletedUser.nom = nom;
+        deletedUser.description = description;
+        deletedUser.stock = stock;
+        const ProduitModifié = await deletedUser.save();
+        res.status(200).json({ message: 'Produit effacé avec succès', updatedUser: ProduitModifié })
 
     } catch (err: any) {
         res.status(500).json({ message: 'Erreur interne', error: err.message })
