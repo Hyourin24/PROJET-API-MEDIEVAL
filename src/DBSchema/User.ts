@@ -5,6 +5,8 @@ enum Role {
     Employé = "Employé",
 }
 
+const userRole: Role= Role.Employé;
+
 export interface UserI extends Document {
     name: string;
     hashedPassword: string;
@@ -14,7 +16,7 @@ export interface UserI extends Document {
 const UserSchema = new Schema({
     name: { type: String, required: true, unique: true },
     hashedPassword: { type: String, required: true },
-    role: { type: Role, default: Role.Employé }
+    role: { type: String, enum:Object.values(Role), default: userRole }
 })
 
 

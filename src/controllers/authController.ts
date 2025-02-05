@@ -18,7 +18,7 @@ export async function register(req: Request, res: Response) {
         const hashedPassword = await hashPassword(password);
 
         //Création d'un nouvel utilisateur
-        const newUser: UserI = new User({ name, hashedPassword });
+        const newUser: UserI = new User({ name, hashedPassword, role: 'Employé'});
 
         //Sauvegarde dans la base de données
         const savedUser = await newUser.save();
@@ -29,9 +29,9 @@ export async function register(req: Request, res: Response) {
         //Réponse réussie
         res.status(201).json({ message: 'Utilisateur créé avec succès', data: savedUser })
     } catch (err: any) {
-        //Erreur de duplication (email unique)
+        //Erreur de duplication (utilisateur unique)
         if (err.code === 11000) {
-            res.status(400).json({ message: 'Cet email est déjà utilisé' })
+            res.status(400).json({ message: 'Cet utilisateur est déjà utilisé' })
             return
         }
         res.status(500).json({ message: 'Erreur interne', error: err.message })
