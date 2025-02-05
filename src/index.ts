@@ -5,7 +5,6 @@ import authRoutes from "./routes/authRoutes";
 import clientRoutes from "./routes/clientRoutes";
 
 
-
 //Création serveur express
 const app = express()
 
@@ -33,7 +32,9 @@ connectDB();
 
 //TODO ajouter routes ici
 app.use('/', authRoutes);
-app.use('/', clientRoutes)
+app.use('/', clientRoutes);
+
+
 
 
 

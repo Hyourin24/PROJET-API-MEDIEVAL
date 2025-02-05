@@ -22,7 +22,7 @@ export function verifyToken(token: string): string | JwtPayload | null {
     }
 }
 
-export function getClientIdFromPayload(payloadJson: string): string | null {
+export function getUserIdFromPayload(payloadJson: string): string | null {
     const payload = JSON.parse(payloadJson) || null;
     return payload.id || null
 }

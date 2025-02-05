@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import user, { UserI } from "../DBSchema/User"
+import user, { UserI } from "../DBSchema/UserSchema"
 import { hashPassword, verifyPassword } from "../utils/pwdUtils";
 import { generateToken } from "../utils/JWTUtils";
-import User from "../DBSchema/User";
+import User from "../DBSchema/UserSchema";
 
 export async function register(req: Request, res: Response) {
     try {
@@ -60,7 +60,7 @@ export async function login(req: Request, res: Response) {
         }
 
         //Génèrer un token JWT
-        const token = generateToken({ id: utilisateur._id });
+        const token = generateToken({ id: utilisateur._id, role: utilisateur.role });
 
         //Envoyer le token dans un cookier sécurisé,
         //le cookie n'est pas accesible par le client et ne peut être envoyé qu'à son émetteur

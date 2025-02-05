@@ -1,6 +1,6 @@
+import UserSchema, { UserI } from '../DBSchema/UserSchema';
 import { Request, Response } from "express";
-import Clients, { ClientsI } from "../DBSchema/Clients";
-import { getClientIdFromPayload } from "../utils/JWTUtils";
+import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 
 
 export async function createClient(req: Request, res: Response) {
@@ -52,7 +52,7 @@ export async function modifyClient(req:Request, res: Response){
           }
       
         const updatedClient = await Clients.findByIdAndUpdate(
-            id, //ID de l'utilisateur à mettre à jour
+            id, 
             {completed:true}, 
             {new:true, runValidators:true}
         );
@@ -84,15 +84,20 @@ export async function modifyClient(req:Request, res: Response){
 
 export async function modifyClientActif(req:Request, res: Response){
     try{
+        
+        const userId = getUserIdFromPayload(req.headers.payload as string);
+
         const {id}= req.params; 
-        const {nom, adresse, email, téléphone, actif} = req.body;
+        const {actif} = req.body;
+        
+
           if(!id){
             res.status(400).json({message:'ID requis'});
             return
           }
-      
+
         const updatedActif = await Clients.findByIdAndUpdate(
-            id, //ID de l'utilisateur à mettre à jour
+            id,
             {completed:true}, 
             {new:true, runValidators:true}
         );
@@ -104,9 +109,19 @@ export async function modifyClientActif(req:Request, res: Response){
             return
         };
 
+        
+        //if ( user.role !== "Admin") {
+            //res.status(401).send({ message: "vous n'avez pas le droit de changer l'actif!" })
+            //return
+        //}
+
         res.status(200).json({message:'Actif mis à jour avec succès', data: updatedActifData});
     } catch(err:any)  {
 
         res.status(500).json({message:'Erreur interne', error:err.message})
     }
+}  
+
+function getUserIdFromPayload(arg0: string) {
+    throw new Error('Function not implemented.');
 }

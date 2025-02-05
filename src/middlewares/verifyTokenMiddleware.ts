@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
-import { verifyToken } from '../src/utils/JWTUtils';
+import { verifyToken } from '../utils/JWTUtils';
 
 dotenv.config();
 
@@ -34,4 +34,6 @@ export function verifyTokenMiddleware(req: Request, res: Response, next: NextFun
     } catch (error: any) {
         res.status(500).json({ message: error.message })
     }
+
+     next();
 }
