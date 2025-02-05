@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/Clients";
+import { getClientIdFromPayload } from "../utils/JWTUtils";
 
 
 export async function createClient(req: Request, res: Response) {
@@ -39,4 +40,39 @@ export async function createClient(req: Request, res: Response) {
     }
 
 
+}
+
+export async function modifyClient(req:Request, res: Response){
+    try{
+        const {id}= req.params; 
+        const {nom, adresse, email, téléphone} = req.body;
+          if(!id){
+            res.status(400).json({message:'ID requis'});
+            return
+          }
+      
+        const updatedClient = await Clients.findByIdAndUpdate(
+            id, //ID de l'utilisateur à mettre à jour
+            {completed:true}, 
+            {new:true, runValidators:true}
+        );
+
+        const updatedClientData = {
+            nom,
+            adresse,
+            email,
+            téléphone
+        }
+        
+
+        if(!updatedClient){
+            res.status(404).json({message:'Client non trouvé'});
+            return
+        }
+        //réponse réussie
+        res.status(200).json({message:'Client mis à jour avec succès', data: updatedClientData});
+    } catch(err:any)  {
+        //Gestion des erreurs
+        res.status(500).json({message:'Erreur interne', error:err.message})
+    }
 }
