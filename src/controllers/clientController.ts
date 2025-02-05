@@ -45,7 +45,7 @@ export async function createClient(req: Request, res: Response) {
 export async function modifyClient(req:Request, res: Response){
     try{
         const {id}= req.params; 
-        const {nom, adresse, email, téléphone} = req.body;
+        const {nom, adresse, email, téléphone, actif} = req.body;
           if(!id){
             res.status(400).json({message:'ID requis'});
             return
@@ -62,13 +62,21 @@ export async function modifyClient(req:Request, res: Response){
             adresse,
             email,
             téléphone
-        }
+        };
         
 
         if(!updatedClient){
             res.status(404).json({message:'Client non trouvé'});
             return
+        };
+
+        if (actif !== undefined) {
+            res.status(400).json({ message: 'Impossible de modifier "actif" sur cette route!' });
+            return;
         }
+
+
+        
         //réponse réussie
         res.status(200).json({message:'Client mis à jour avec succès', data: updatedClientData});
     } catch(err:any)  {
