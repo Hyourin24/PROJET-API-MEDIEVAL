@@ -1,6 +1,7 @@
 import UserSchema, { UserI } from '../DBSchema/UserSchema';
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
+import { compare } from 'bcryptjs';
 
 
 export async function createClient(req: Request, res: Response) {
@@ -125,4 +126,16 @@ export async function modifyClientActif(req:Request, res: Response){
 export function getUserIdFromPayload(payloadJson: string): string | null {
     const payload = JSON.parse(payloadJson) || null;
     return payload.id || null
+}
+
+export async function getAllActiveClients (req: Request, res: Response) {
+    try{
+        const client = await Clients.find({actif: "true"});
+
+        res.status(200).send({message: "Liste des clients actifs" , client});
+    }
+    catch(err:any){
+        res.status(500).send({message:err.message})
+    }
+
 }
