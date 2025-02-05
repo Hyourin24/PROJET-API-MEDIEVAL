@@ -21,3 +21,8 @@ export function verifyToken(token: string): string | JwtPayload | null {
         return null;
     }
 }
+
+export function getUserIdFromPayload(payloadJson: string): string | null {
+    const payload = JSON.parse(payloadJson) || null;
+    return payload.id || null
+}

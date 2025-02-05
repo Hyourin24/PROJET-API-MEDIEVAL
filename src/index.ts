@@ -1,6 +1,9 @@
 import express from "express";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
+import UserRoutes from "./routes/UserRoutes";
+import CommandesRoutes from "./routes/CommandesRoutes";
+import ProduitsRoutes from "./routes/ProduitsRoutes";
 
 
 
@@ -30,8 +33,9 @@ const connectDB = async () => {
 connectDB();
 
 //TODO ajouter routes ici
-
-
+app.use('/auth', UserRoutes)
+app.use('/commandes', CommandesRoutes)
+app.use('/produits', ProduitsRoutes)
 
 //app.listen indique au serveur d'écouter les requêtes HTTP arrivant sur le
 //port indiqué
