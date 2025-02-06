@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { hashPassword, verifyPassword } from '../utils/pwdUtils';
-import UserSchema, {UserI} from '../DBSchema/User';
+import UserSchema, {UserI} from '../DBSchema/UserSchema';
 import { generateToken } from '../utils/JWTUtils';
 
 export async function register(req:Request, res:Response){

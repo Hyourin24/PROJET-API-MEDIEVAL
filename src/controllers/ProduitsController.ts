@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import ProduitsSchema, {ProduitsI} from '../DBSchema/Produits';
+import ProduitsSchema, {ProduitsI} from '../DBSchema/ProduitsSchema';
 import { getUserIdFromPayload } from '../utils/JWTUtils';
-import User, { UserI } from '../DBSchema/User';
-import Produits from '../DBSchema/Produits';
+import User, { UserI } from '../DBSchema/UserSchema';
+import Produits from '../DBSchema/ProduitsSchema';
 
 export async function createProduit(req: Request, res: Response) {
     try {

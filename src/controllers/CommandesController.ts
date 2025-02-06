@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import Produits, {ProduitsI} from '../DBSchema/Produits';
+import Produits, {ProduitsI} from '../DBSchema/ProduitsSchema';
 import { getUserIdFromPayload } from '../utils/JWTUtils';
-import User, { UserI } from '../DBSchema/User';
-import Commandes from '../DBSchema/Commandes';
+import User, { UserI } from '../DBSchema/UserSchema';
+import Commandes from '../DBSchema/CommandesSchema';
 
 // export async function createCommande(req:Request, res:Response){
 //     try{
@@ -62,38 +62,23 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             return;
         }
 
-        const { produitsAssociés, quantités, prixUnitaire } = req.body;
+        let { produitsAssociés, quantités, prixUnitaire } = req.body;
+        const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
+        produitsAssociés = produitsDetails
 
-        // Vérifier que tous les produits existent
-        const produits = await Produits.find({ _id: { $in: produitsAssociés } });
-        if (!Array.isArray(produitsAssociés) ||  !Array.isArray(prixUnitaire)) {
-            res.status(400).send({ message: "Les champs produitsAssociés et prixUnitaire doivent être des tableaux." });
-            return;
-        }
-
-        // Calcul du montant total
-        const montantTotal = produitsAssociés.reduce((total, index) => {
-            return total + (prixUnitaire[index] * quantités[index]);
-        }, 0);
-
-        // Création de la commande
         const newCommande = new Commandes({
             création: new Date(),
             modification: new Date(),
             status: "En attente",
-            produitsAssociés,
+            produitsAssociés: produitsDetails,
             quantités,
             prixUnitaire,
-            montantTotal
+            // montantTotal
         });
 
-       const CommandeCrée = await newCommande.save()
-
-        // Récupération des produits avec leurs noms
-        const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } }, "_id nom");
-
+        let commandeCrée = await newCommande.save();
         res.status(201).json({
-            message: "La commande a été créée avec succès", newCommande: CommandeCrée
+            message: "La commande a été créée avec succès", newCommande: commandeCrée
         });
     } catch (err: any) {
         res.status(500).json({ message: err.message });
