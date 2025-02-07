@@ -30,6 +30,7 @@ const connectDB = async () => {
     }
 };
 
+
 connectDB();
 
 //TODO ajouter routes ici
