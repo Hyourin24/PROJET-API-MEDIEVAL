@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import Produits, {ProduitsI} from '../DBSchema/ProduitsSchema';
+import Clients, {ClientsI} from '../DBSchema/ClientsSchema'
 import { getUserIdFromPayload } from '../utils/JWTUtils';
 import User, { UserI } from '../DBSchema/UserSchema';
-import Commandes from '../DBSchema/CommandesSchema';
+import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
+import mongoose from 'mongoose';
 
 // export async function createCommande(req:Request, res:Response){
 //     try{
@@ -62,75 +64,103 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             return;
         }
 
-        let { produitsAssociés, quantités, prixUnitaire, montantTotal } = req.body;
+        let { produitsAssociés, quantités, prixUnitaire, montantTotal, client } = req.body;
+
+        // Récupérer les détails des produits
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
-        produitsAssociés = produitsDetails
-        // const quantitéDétail = await produitsAssociés.findById({produitsAssocié })
-        // quantités = quantitéDétail
+        const clientDétails = await Clients.find({_id: { $in: client }});
 
-        // if (!Array.isArray(produitsAssociés) || !Array.isArray(prixUnitaire)) {
-        //     res.status(400).send({ message: "Les champs produitsAssociés et prixUnitaire doivent être des tableaux." });
-        //     return;
-        // }
-        // const montant = prixUnitaire.reduce((total, prix, index) => {
-        //     return total + (prix * quantités[index]);
-        // }, 0);
+        
 
+        // Création de la commande
         const newCommande = new Commandes({
             création: new Date(),
             modification: new Date(),
+            client: clientDétails, 
             status: "En attente",
             produitsAssociés: produitsDetails,
             quantités,
             prixUnitaire,
-            // montantTotal: montant
         });
 
+        // Sauvegarde de la commande
         let commandeCrée = await newCommande.save();
+
+        // Ajouter l'ID de la commande dans l'historique du client
+        clientDétails[0].historique.push(commandeCrée.id); 
+        await clientDétails[0].save();
+
+        // Répondre avec la commande et le client mis à jour
         res.status(201).json({
-            message: "La commande a été créée avec succès", newCommande: commandeCrée
+            message: "La commande a été créée avec succès",
+            commande: commandeCrée,
+            client: clientDétails // Retourner le client mis à jour avec l'historique
         });
+
     } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
 }
 
-export async function getUserCommande (req: Request, res: Response): Promise<void> {
-//   try {
-    
-//     const user = req.headers.user ? JSON.parse(req.headers.user as string) : null;
-
-//     if (!user) {
-//       res.status(401).json({ message: "Utilisateur non authentifié" });
-//       return;
-//     }
-
-    
-//     const userId = user.id;
-
-   
-//     if (!userId) {
-//       res.status(400).json({ message: "ID utilisateur manquant dans le token" });
-//       return;
-//     }
-
-    
-//     const playlists = await PlaylistSchema.find({ userId });
-
-    
-//     if (playlists.length === 0) {
-//       res.status(404).json({ message: "Aucun playlist trouvé pour cet utilisateur" });
-//       return;
-//     }
-
-    
-//     res.status(200).json(playlists);
-//     return;
-
-//   } catch (err: any) {
-//     console.error("Erreur lors de la récupération des playlists utilisateur :", err);
-//     res.status(500).json({ message: "Erreur interne du serveur" });
-//     return;
-//   }
-// }
+export async function getClientsCommande(req: Request, res: Response) {
+    try {
+        const userId = getUserIdFromPayload(req.headers.payload as string);
+        const { commandesId } = req.params;
+        const client: ClientsI | null = await Clients.findById(userId);
+        if (!client) {
+            res.status(404).send({ message: "utilisateur introuvable" })
+            return
+        }
+        const commande: CommandesI | null = await Commandes.findById(commandesId);
+        if (commande === null) {
+            res.status(404).send({ message: "playlist not found" })
+            return
+        }
+        if (commande.clientId !== userId) {
+            res.status(401).send({ message: "you have no right to touch this playlist" })
+            return
+        }
+        res.status(200).send({ message: 'commandes trouvées', commande, client})
+    } catch (err: any) {
+        res.status(500).send({ message: err.message })
+    }
 }
+
+
+
+
+export async function modifyStatus(req: Request, res: Response): Promise<void> {
+    try {
+        const commande = await Commandes.findById(req.headers.payload as string);
+        if (!commande) {
+            res.status(404).json({ message: "Commande introuvable" });
+            return;
+        }
+
+        const { status } = req.body;
+        const validStatuses = ["En attente", "Expédiée", "Livrée", "Annulée"];
+
+        if (!validStatuses.includes(status)) {
+            res.status(400).json({ message: "Statut invalide" });
+            return;
+        }
+        const updatedCommande = await Commandes.findByIdAndUpdate(
+            { status },
+            { new: true }
+        );
+
+        res.status(200).json({
+            message: "Statut mis à jour avec succès",
+            commande: updatedCommande
+        });
+
+    } catch (err: any) {
+        res.status(500).json({ message: 'Erreur interne', error: err.message });
+    }
+}
+
+        
+        
+     
+
+

@@ -5,6 +5,7 @@ import mongoose, { Document, Schema } from "mongoose"
 export interface ClientsI extends Document {
     nom: string;
     adresse: string;
+    historique: string[];
     email: string;
     téléphone: number;
     actif: boolean;
@@ -13,6 +14,7 @@ export interface ClientsI extends Document {
 const ClientSchema = new Schema({
     nom: { type: String, required: true, unique: true },
     adresse: { type: String, required: true },
+    historique: { type: [String]},
     email: { type: String, required: true },
     téléphone: {type: Number, required: true},
     actif: {type: Boolean, default: true}

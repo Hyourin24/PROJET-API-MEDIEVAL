@@ -2,12 +2,13 @@ import UserSchema, { UserI } from '../DBSchema/UserSchema';
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 import { compare } from 'bcryptjs';
+import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
 
 
 export async function createClient(req: Request, res: Response) {
     try {
     
-        const { nom, adresse, email, téléphone } = req.body;
+        let { nom, adresse, email, historique, téléphone } = req.body;
 
         if (!nom) {
             res.status(400).send({ message: "nom requis" })
@@ -29,8 +30,8 @@ export async function createClient(req: Request, res: Response) {
             res.status(404).send({ message: "téléphone requis" })
             return
         }
-
-        const client: ClientsI = new Clients({ nom, adresse, email, téléphone, actif: true});
+        
+        const client: ClientsI = new Clients({ nom, adresse, email, historique, téléphone, actif: true});
 
         const createdClient = await client.save()
 
@@ -128,6 +129,11 @@ export function getUserIdFromPayload(payloadJson: string): string | null {
     return payload.id || null
 }
 
+export function getClientIdFromPayload(payloadJson: string): string | null {
+    const payload = JSON.parse(payloadJson) || null;
+    return payload.id || null
+}
+
 export async function getAllActiveClients (req: Request, res: Response) {
     try{
         const client = await Clients.find({actif: "true"});
@@ -139,3 +145,6 @@ export async function getAllActiveClients (req: Request, res: Response) {
     }
 
 }
+
+
+
