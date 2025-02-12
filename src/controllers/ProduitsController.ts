@@ -12,6 +12,10 @@ export async function createProduit(req: Request, res: Response) {
             res.status(400).send({ message: "Tous les champs doivent être complets" })
         }
 
+        if(stock < 0 ) {
+            res.status(400).send({message: "Le stock doit être au dessus de 0"})
+        }
+
         const newProduit: ProduitsI = new ProduitsSchema ({
             nom, 
             description,
@@ -52,6 +56,11 @@ export async function modifyProduit(req: Request, res: Response) {
             res.status(404).json({ message: 'Produit non trouvé' })
             return
         }
+
+        if(stock < 0 ) {
+            res.status(400).send({message: "Le stock doit être au dessus de 0"})
+        }
+        
         updatedUser.nom = nom;
         updatedUser.description = description;
         updatedUser.stock = stock;
