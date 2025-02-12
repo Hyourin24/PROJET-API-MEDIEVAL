@@ -54,7 +54,7 @@ export async function modifyClient(req:Request, res: Response){
             return
           }
       
-        const updatedClient = await Clients.findByIdAndUpdate(
+            const updatedClient = await Clients.findByIdAndUpdate(
             id, 
             {completed:true}, 
             {new:true, runValidators:true}
