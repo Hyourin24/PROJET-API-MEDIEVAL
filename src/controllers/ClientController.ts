@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 import { compare } from 'bcryptjs';
 import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
+import ClientsSchema from '../DBSchema/ClientsSchema';
 
 
 export async function createClient(req: Request, res: Response) {
@@ -146,5 +147,63 @@ export async function getAllActiveClients (req: Request, res: Response) {
 
 }
 
+export async function addOrderfromHistory(req: Request, res: Response) {
+    try {
+        const { id } = req.params;
+        const { order } = req.body;
+        const user = req.headers.user ? JSON.parse(req.headers.user as string) : null;
+    
+        if (!id) {
+          res.status(400).send("Id introuvable");
+          return;
+        }
+    
+        const client = await ClientsSchema.findById(id).exec();
+        if (!client) {
+          res.status(404).send("Client introuvable");
+          return;
+        }
+    
+        if (client.id !== user.id) {
+          res.status(403).send("Client introuvable");
+          return;
+        }
+    
+        client.historique.push(order);
+    
+        const updatedClient = await client.save();
+    
+        res.status(200).json(updatedClient);
+      } catch (err) {
+        res.status(500).send("Erreur interne");
+        return;
+      }
 
+}
+export const deleteOrderFromHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id, idOrder } = req.params;
+      if (!id) {
+        res.status(400).send("Id introuvable");
+        return;
+      }
+  
+      const client = await ClientsSchema.findById(id).exec();
+      if (!client) {
+        res.status(404).send("Client introuvable");
+        return;
+      }
+  
+
+  const index = client.historique.indexOf(idOrder);
+      client.historique.splice(index,1);
+  
+      const updatedClient = await client.save();
+  
+      res.status(200).json(updatedClient);
+    } catch (err:any) {
+      res.status(500).json({message:"Erreur interne", error: err.message});
+    
+    }
+  };
 
