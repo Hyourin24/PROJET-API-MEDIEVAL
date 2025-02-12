@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 import { compare } from 'bcryptjs';
 import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
+import exp from 'constants';
 
 
 export async function createClient(req: Request, res: Response) {
@@ -132,6 +133,17 @@ export function getUserIdFromPayload(payloadJson: string): string | null {
 export function getClientIdFromPayload(payloadJson: string): string | null {
     const payload = JSON.parse(payloadJson) || null;
     return payload.id || null
+}
+
+export async function getAllClients(req: Request, res: Response) {
+     try{
+        const client = await Clients.find();
+
+        res.status(200).send({message: "Liste des clients actifs" , client});
+    }
+    catch(err:any){
+        res.status(500).send({message:err.message})
+    }
 }
 
 export async function getAllActiveClients (req: Request, res: Response) {

@@ -65,14 +65,23 @@ export async function createCommande(req: Request, res: Response): Promise<void>
         }
 
         let { produitsAssociés, quantités, prixUnitaire, montantTotal, client } = req.body;
-
-        // Récupérer les détails des produits
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
         const clientDétails = await Clients.find({_id: { $in: client }});
+        const calcul = Array.isArray(produitsAssociés);
+        produitsAssociés.reduce((total: number, produit: { prix: any; }) => {
+        if (!produit || typeof produit !== "object") {
+            console.warn("Produit invalide détecté:", produit);
+            return total; 
+        }
 
-        
+        const prix = Number(produit.prix);
+        if (isNaN(prix)) {
+            console.warn("Prix invalide détecté pour le produit:", produit);
+            return total; 
+        }
 
-        // Création de la commande
+        return total + prix; 
+    }, 0)
         const newCommande = new Commandes({
             création: new Date(),
             modification: new Date(),
@@ -81,20 +90,14 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             produitsAssociés: produitsDetails,
             quantités,
             prixUnitaire,
+            montantTotal: calcul
         });
 
-        // Sauvegarde de la commande
         let commandeCrée = await newCommande.save();
-
-        // Ajouter l'ID de la commande dans l'historique du client
-        clientDétails[0].historique.push(commandeCrée.id); 
+        clientDétails[0].historique.push(commandeCrée.id)
         await clientDétails[0].save();
-
-        // Répondre avec la commande et le client mis à jour
         res.status(201).json({
-            message: "La commande a été créée avec succès",
-            commande: commandeCrée,
-            client: clientDétails // Retourner le client mis à jour avec l'historique
+            message: "La commande a été créée avec succès", commande: commandeCrée, client: clientDétails
         });
 
     } catch (err: any) {
@@ -126,26 +129,34 @@ export async function getClientsCommande(req: Request, res: Response) {
     }
 }
 
-
-
-
 export async function modifyStatus(req: Request, res: Response): Promise<void> {
     try {
-        const commande = await Commandes.findById(req.headers.payload as string);
+        const commandeId = req.params.id;
+        const commande = await Commandes.findById(commandeId);
+
         if (!commande) {
             res.status(404).json({ message: "Commande introuvable" });
             return;
         }
 
-        const { status } = req.body;
-        const validStatuses = ["En attente", "Expédiée", "Livrée", "Annulée"];
+        const { status } = commande; 
+        let actualStatus: string = status
+        let newStatus: string = "";
 
-        if (!validStatuses.includes(status)) {
-            res.status(400).json({ message: "Statut invalide" });
+        if (actualStatus == "En attente") {
+            newStatus = "Expédiée";
+        } else if (actualStatus == "Expédiée") {
+            newStatus = "Livrée";
+        } else if (actualStatus == "Livrée") {
+            res.status(400).json({ message: "Impossible de changer le statut, déjà livré" });
+            return;
+        } else {
+            res.status(400).json({ message: "Status inconnu ou invalide" });
             return;
         }
         const updatedCommande = await Commandes.findByIdAndUpdate(
-            { status },
+            commandeId,
+            { status: newStatus },
             { new: true }
         );
 
@@ -155,12 +166,7 @@ export async function modifyStatus(req: Request, res: Response): Promise<void> {
         });
 
     } catch (err: any) {
-        res.status(500).json({ message: 'Erreur interne', error: err.message });
+        res.status(500).json({ message: "Erreur interne", error: err.message });
     }
 }
-
-        
-        
-     
-
 

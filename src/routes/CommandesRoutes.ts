@@ -7,5 +7,6 @@ const router = Router();
 router.post('/create',verifyTokenMiddleware, createCommande);
 router.put('/modify/:id', verifyTokenMiddleware, modifyStatus )
 router.get('/getcommandeclient', verifyTokenMiddleware, getClientsCommande)
+router.put('/modifystatus/:id', verifyTokenMiddleware, modifyStatus)
    
 export default router;
