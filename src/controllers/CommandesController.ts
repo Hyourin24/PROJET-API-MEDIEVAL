@@ -5,6 +5,7 @@ import { getUserIdFromPayload } from '../utils/JWTUtils';
 import User, { UserI } from '../DBSchema/UserSchema';
 import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
 import mongoose from 'mongoose';
+import ProduitsSchema from '../DBSchema/ProduitsSchema';
 
 // export async function createCommande(req:Request, res:Response){
 //     try{
@@ -64,46 +65,52 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             return;
         }
 
-        let { produitsAssociés, quantités, prixUnitaire, montantTotal, client } = req.body;
+        let { produitsAssociés, client, quantités, prixUnitaire, montantTotal } = req.body;
+        let { stock } = req.body
+    
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
-        const clientDétails = await Clients.find({_id: { $in: client }});
-        const calcul = Array.isArray(produitsAssociés);
-        produitsAssociés.reduce((total: number, produit: { prix: any; }) => {
-        if (!produit || typeof produit !== "object") {
-            console.warn("Produit invalide détecté:", produit);
-            return total; 
+        const clientDétails = await Clients.find({ _id: { $in: client } });
+        
+        if (stock < 0) {
+            res.status(404).send({ message: "Le stock ne peut pas être négatif ta race" });
+            return;
+        } else if (stock >= 1) {
+            stock--
+            res.status(200).send({ message: `Le stock du ou des produits ${produitsDetails} est à présent de ${stock}`})
+            return;
         }
 
-        const prix = Number(produit.prix);
-        if (isNaN(prix)) {
-            console.warn("Prix invalide détecté pour le produit:", produit);
-            return total; 
-        }
+       const montant = prixUnitaire.reduce((acc: number, prix: number) => acc + prix, 0);
+       
+     
+        //Création de la commande
+        const creationDate = new Date();
 
-        return total + prix; 
-    }, 0)
         const newCommande = new Commandes({
-            création: new Date(),
-            modification: new Date(),
-            client: clientDétails, 
+            création: creationDate,
+            client: clientDétails.map(client => client._id), 
             status: "En attente",
             produitsAssociés: produitsDetails,
-            quantités,
+            quantités,  
             prixUnitaire,
-            montantTotal: calcul
+            montantTotal: montant
         });
 
         let commandeCrée = await newCommande.save();
-        clientDétails[0].historique.push(commandeCrée.id)
-        await clientDétails[0].save();
-        res.status(201).json({
-            message: "La commande a été créée avec succès", commande: commandeCrée, client: clientDétails
-        });
+        if (clientDétails.length > 0) {
+            clientDétails[0].historique.push(commandeCrée.id);
+            await clientDétails[0].save();
+        }
+        const updatedStock = await stock.save();
+
+        res.status(201).json({ message: "La commande a été créée avec succès", commande: commandeCrée, stock: updatedStock});
 
     } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
 }
+
+
 
 export async function getClientsCommande(req: Request, res: Response) {
     try {
@@ -131,8 +138,10 @@ export async function getClientsCommande(req: Request, res: Response) {
 
 export async function modifyStatus(req: Request, res: Response): Promise<void> {
     try {
-        const commandeId = req.params.id;
-        const commande = await Commandes.findById(commandeId);
+    
+    
+    const commandeId = req.params.id;
+    const commande = await Commandes.findById(commandeId);
 
         if (!commande) {
             res.status(404).json({ message: "Commande introuvable" });
@@ -160,13 +169,52 @@ export async function modifyStatus(req: Request, res: Response): Promise<void> {
             { new: true }
         );
 
-        res.status(200).json({
-            message: "Statut mis à jour avec succès",
-            commande: updatedCommande
-        });
+
+        let { modification } = req.body
+        let modificationNow: Date = new Date(); 
+        modification = modificationNow
+
+        res.status(200).json({ message: "Statut mis à jour avec succès", commande: updatedCommande, modification  });
 
     } catch (err: any) {
         res.status(500).json({ message: "Erreur interne", error: err.message });
     }
 }
+
+export async function modifyCancelStatus(req: Request, res: Response): Promise<void> {
+    try {
+        const commandeId = req.params.id;
+        const commande = await Commandes.findById(commandeId);
+
+        if (!commande) {
+            res.status(404).json({ message: "Commande introuvable" });
+            return;
+        }
+
+        const { status } = commande; 
+        let actualStatus: string = status
+        let newStatus: string = "";
+
+        if (actualStatus == "En attente" || actualStatus === "Expédiée" || actualStatus === "Livrée") {
+            newStatus = "Annulée";
+        } else if (actualStatus == "Annulée") {
+            res.status(400).json({ message: "Le statut est déjà annulé, débile" });
+            return;
+        } else {
+            res.status(400).json({ message: "Status inconnu ou invalide" });
+            return;
+        }
+        const updatedCommande = await Commandes.findByIdAndUpdate(
+            commandeId,
+            { status: newStatus },
+            { new: true }
+        );
+
+        res.status(200).json({message: "Statut mis à jour avec succès", commande: updatedCommande});
+
+    } catch (err: any) {
+        res.status(500).json({ message: "Erreur interne", error: err.message });
+    }
+}
+
 

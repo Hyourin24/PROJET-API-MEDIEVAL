@@ -5,6 +5,7 @@ import UserRoutes from "./routes/UserRoutes";
 import CommandesRoutes from "./routes/CommandesRoutes";
 import ProduitsRoutes from "./routes/ProduitsRoutes";
 import ClientRoutes from "./routes/ClientRoutes";
+import DashboardRoutes from "./routes/DashboardRoutes";
 
 
 
@@ -39,6 +40,7 @@ app.use('/auth', UserRoutes)
 app.use('/commandes', CommandesRoutes)
 app.use('/produits', ProduitsRoutes)
 app.use('/clients', ClientRoutes);
+app.use('/dashboard', DashboardRoutes)
 
 //app.listen indique au serveur d'écouter les requêtes HTTP arrivant sur le
 //port indiqué

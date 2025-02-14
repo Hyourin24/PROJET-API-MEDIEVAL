@@ -11,7 +11,6 @@ const commandesStatus: Status = Status.EnAttente;
 export interface CommandesI extends Document {
     clientId: string | null;
     création: Date;
-    modification: Date;
     client: String[];
     status: Status;
     produitsAssociés: String[];
@@ -23,11 +22,11 @@ export interface CommandesI extends Document {
 const CommandesSchema = new Schema({
     clientId: { type: String},
     création: { type: Date },
-    modification: { type: Date },
+    modification: { type: Date, default: Date.now },
     client: { type: [String], required: true},
     status: { type: String, enum: Object.values(Status), default: commandesStatus },
     produitsAssociés: { type: [String], required: true },
-    quantités: { type: Number, required: true},
+    quantités: { type: Number},
     prixUnitaire: { type: [Number], required: true },
     montantTotal: { type: Number }
 })

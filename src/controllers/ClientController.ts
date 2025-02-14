@@ -4,6 +4,7 @@ import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 import { compare } from 'bcryptjs';
 import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
 import exp from 'constants';
+import ProduitsSchema from '../DBSchema/ProduitsSchema';
 
 
 export async function createClient(req: Request, res: Response) {
@@ -87,7 +88,6 @@ export async function modifyClient(req:Request, res: Response){
 
 export async function modifyClientActif(req:Request, res: Response){
     try{
-        
         const userId = getUserIdFromPayload(req.headers.payload as string);
 
         const {id}= req.params; 
