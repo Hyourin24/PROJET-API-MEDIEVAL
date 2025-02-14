@@ -6,34 +6,43 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 
    const router = Router();
 
-   /**
+ /**
  * @swagger
  * /create:
  *   post:
- *     summary: Create a new product
- *     tags: [Produits]
+ *     summary: Créer un nouveau produit
+ *     description: Permet de créer un produit en ajoutant son nom, sa description et son stock.
+ *     tags:
+ *       - Produits
+ *     security:
+ *       - Bearer: []
  *     requestBody:
+ *       description: Les informations du produit à créer
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - nom
+ *               - description
+ *               - stock
  *             properties:
  *               nom:
  *                 type: string
- *                 description: The name of the product
- *                 example: 'Produit A'
+ *                 example: "Produit A"
+ *                 description: "Le nom du produit"
  *               description:
  *                 type: string
- *                 description: A description of the product
- *                 example: 'Description du produit A'
+ *                 example: "C'est un produit exemple"
+ *                 description: "La description du produit"
  *               stock:
  *                 type: integer
- *                 description: The stock quantity of the product
- *                 example: 100
+ *                 example: 50
+ *                 description: "Le stock disponible du produit"
  *     responses:
  *       201:
- *         description: Product created successfully
+ *         description: Produit créé avec succès
  *         content:
  *           application/json:
  *             schema:
@@ -41,11 +50,21 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'Produits créés avec succès'
+ *                   example: "Produit créé avec succès"
  *                 newProduit:
  *                   $ref: '#/components/schemas/Produit'
+ *       403:
+ *         description: Mauvaise requête (champs manquants ou stock invalide)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Tous les champs doivent être complets"
  *       400:
- *         description: Bad request (missing fields)
+ *         description: Le stock doit être supérieur ou égal à 0
  *         content:
  *           application/json:
  *             schema:
@@ -53,9 +72,9 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'Tous les champs doivent être complets'
+ *                   example: "Le stock doit être au dessus de 0"
  *       500:
- *         description: Internal server error
+ *         description: Erreur interne du serveur
  *         content:
  *           application/json:
  *             schema:
@@ -63,13 +82,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 'Erreur interne'
- *                 error:
- *                   type: string
- *                   example: 'Internal error message'
- *     security:
- *       - bearToken: []
- * 
+ *                   example: "Erreur serveur"
  * components:
  *   schemas:
  *     Produit:
@@ -77,22 +90,13 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
  *       properties:
  *         nom:
  *           type: string
- *           example: 'Produit A'
+ *           description: "Nom du produit"
  *         description:
  *           type: string
- *           example: 'Description du produit A'
+ *           description: "Description du produit"
  *         stock:
  *           type: integer
- *           example: 100
- *         _id:
- *           type: string
- *           example: '607d1b1f1f1f1f1f1f1f1f1f'
- *         createdAt:
- *           type: string
- *           example: '2025-02-12T12:00:00Z'
- *         updatedAt:
- *           type: string
- *           example: '2025-02-12T12:00:00Z'
+ *           description: "Stock du produit"
  */
    router.post('/create',verifyTokenMiddleware, createProduit);
 

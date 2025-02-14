@@ -43,7 +43,7 @@ export async function modifyProduit(req: Request, res: Response) {
         const { id } = req.params; 
         const { nom, description, stock } = req.body;
         if (!nom || !description || !stock) {
-            res.status(400).json({ message: 'Les champds doivent être modifiés' })
+            res.status(403).json({ message: 'Les champds doivent être modifiés' })
         }
         //Mise à jour des champs
         const updatedUser = await Produits.findByIdAndUpdate(
@@ -60,7 +60,7 @@ export async function modifyProduit(req: Request, res: Response) {
         if(stock < 0 ) {
             res.status(400).send({message: "Le stock doit être au dessus de 0"})
         }
-        
+
         updatedUser.nom = nom;
         updatedUser.description = description;
         updatedUser.stock = stock;
