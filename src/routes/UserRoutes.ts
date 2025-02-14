@@ -94,38 +94,36 @@ const router = Router();
    router.post('/register', register);
 
    /**
+ /**
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Authentifie un utilisateur et génère un token JWT
- *     description: >
- *       Permet à un utilisateur de se connecter en utilisant son nom et son mot de passe.
- *       Si les informations sont valides, un token JWT est généré et envoyé dans un cookie sécurisé.
+ *     summary: Connexion d'un utilisateur
+ *     description: Permet de connecter un utilisateur avec son nom d'utilisateur et son mot de passe.
  *     tags:
  *       - Authentification
  *     requestBody:
+ *       description: Les informations de connexion de l'utilisateur
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - password
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Alice"
- *                 description: Le nom d'utilisateur.
+ *                 example: "Astérix"
+ *                 description: "Le nom d'utilisateur de l'utilisateur"
  *               password:
  *                 type: string
  *                 example: "pwd"
- *                 description: Le mot de passe de l'utilisateur.
+ *                 description: "Le mot de passe de l'utilisateur"
  *     responses:
  *       200:
- *         description: Connexion réussie, token JWT renvoyé dans les cookies.
- *         headers:
- *           Set-Cookie:
- *             description: Le cookie contenant le token JWT.
- *             schema:
- *               type: string
+ *         description: Connexion réussie
  *         content:
  *           application/json:
  *             schema:
@@ -133,9 +131,9 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Login successful!"
+ *                   example: "Connexion réussie"
  *       401:
- *         description: Identifiants invalides
+ *         description: Mot de passe incorrect
  *         content:
  *           application/json:
  *             schema:
@@ -143,9 +141,9 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Invalid credentials."
+ *                   example: "Mot de passe incorrect"
  *       404:
- *         description: Utilisateur introuvable
+ *         description: Utilisateur non trouvé
  *         content:
  *           application/json:
  *             schema:
@@ -153,7 +151,7 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User not found."
+ *                   example: "Utilisateur non trouvé"
  *       500:
  *         description: Erreur interne du serveur
  *         content:
@@ -163,7 +161,25 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Internal server error."
+ *                   example: "Erreur serveur"
+ * components:
+ *   schemas:
+ *     LoginRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: "Nom d'utilisateur de l'utilisateur"
+ *         password:
+ *           type: string
+ *           description: "Mot de passe de l'utilisateur"
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: "Message de réponse"
+ *           example: "Connexion réussie"
  */
 router.post('/login', login);
    

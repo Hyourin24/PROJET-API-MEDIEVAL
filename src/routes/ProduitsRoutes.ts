@@ -8,7 +8,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 
  /**
  * @swagger
- * /create:
+ * /produits/create:
  *   post:
  *     summary: Créer un nouveau produit
  *     description: Permet de créer un produit en ajoutant son nom, sa description et son stock.
@@ -102,7 +102,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 
    /**
  * @swagger
- * /get:
+ * /produits/get:
  *   get:
  *     summary: Get all products
  *     tags: [Produits]
@@ -165,7 +165,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 // Modify Produit route
 /**
  * @swagger
- * /modify/{id}:
+ * /produits/modify/{id}:
  *   put:
  *     summary: Modify an existing product
  *     tags: [Produits]
@@ -248,7 +248,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 
    /**
  * @swagger
- * /put/{id}:
+ * /produits/put/{id}:
  *   put:
  *     summary: Modify an existing product
  *     tags: [Produits]
@@ -355,7 +355,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 
    /**
  * @swagger
- * /delete/{id}:
+ * /produits/delete/{id}:
  *   delete:
  *     summary: Delete a product by ID
  *     tags: [Produits]
