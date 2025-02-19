@@ -6,6 +6,8 @@ import CommandesRoutes from "./routes/CommandesRoutes";
 import ProduitsRoutes from "./routes/ProduitsRoutes";
 import ClientRoutes from "./routes/ClientRoutes";
 import DashboardRoutes from "./routes/DashboardRoutes";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocs from './config/swagger';
 
 
 
@@ -42,6 +44,7 @@ app.use('/produits', ProduitsRoutes)
 app.use('/clients', ClientRoutes);
 app.use('/dashboard', DashboardRoutes)
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 //app.listen indique au serveur d'écouter les requêtes HTTP arrivant sur le
 //port indiqué
 app.listen(PORT, () => {
