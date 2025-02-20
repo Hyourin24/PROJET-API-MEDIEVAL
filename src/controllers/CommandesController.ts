@@ -65,51 +65,90 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             return;
         }
 
-        let { produitsAssociés, client, quantités, prixUnitaire, montantTotal } = req.body;
-        let { stock } = req.body
-    
-        const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
-        const clientDétails = await Clients.find({ _id: { $in: client } });
-        
-        if (stock < 0) {
-            res.status(404).send({ message: "Le stock ne peut pas être négatif ta race" });
-            return;
-        } else if (stock >= 1) {
-            stock--
-            res.status(200).send({ message: `Le stock du ou des produits ${produitsDetails} est à présent de ${stock}`})
+        let { produitsAssociés, client, quantités, prixUnitaire } = req.body;
+
+        // Vérification des entrées
+        if (!produitsAssociés || !quantités || !prixUnitaire || !client) {
+            res.status(400).send({ message: "Les champs produits associés, client, quantités et prixUnitaire doivent être remplis" });
             return;
         }
 
-       const montant = prixUnitaire.reduce((acc: number, prix: number) => acc + prix, 0);
-       
-     
-        //Création de la commande
+        // Récupération des produits
+        const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
+
+        if (!produitsDetails || produitsDetails.length !== produitsAssociés.length) {
+            res.status(404).send({ message: "Certains produits sont introuvables." });
+            return;
+        }
+
+        // Vérification et mise à jour du stock
+        for (let i = 0; i < produitsDetails.length; i++) {
+            let produit = produitsDetails[i];
+
+            console.log(`Produit ${produit.nom} (ID: ${produit._id}): Stock actuel = ${produit.stock}, Commande = ${quantités[i]}`);
+
+            if (typeof produit.stock !== 'number' || isNaN(produit.stock)) {
+                res.status(400).send({ message: `Le stock du produit ${produit.nom} est invalide.` });
+                return;
+            }
+
+            if (produit.stock < quantités[i]) {
+                res.status(400).send({ message: `Stock insuffisant pour le produit ${produit.nom}` });
+                return;
+            }
+        }
+
+        // Mise à jour du stock après vérifications
+        for (let i = 0; i < produitsDetails.length; i++) {
+            let produit = produitsDetails[i];
+
+            produit.stock = Number(produit.stock) - Number(quantités[i]);
+
+            console.log(`Mise à jour: Produit ${produit.nom} => Nouveau stock = ${produit.stock}`);
+
+            await produit.save();
+        }
+
+        // Calcul du montant total
+        const montantTotal = prixUnitaire.reduce((acc: number, prix: number, index: number) => acc + prix * quantités[index], 0);
+
+        // Vérifier si le client existe
+        const clientDétails = await Clients.findById(client);
+
+        if (!clientDétails) {
+            res.status(404).send({ message: "Client introuvable" });
+            return;
+        }
+
+        // Création de la commande
         const creationDate = new Date();
 
         const newCommande = new Commandes({
             création: creationDate,
-            client: clientDétails.map(client => client._id), 
+            client: clientDétails._id,
             status: "En attente",
-            produitsAssociés: produitsDetails,
-            quantités,  
+            produitsAssociés: produitsAssociés,
+            quantités,
             prixUnitaire,
-            montantTotal: montant
+            montantTotal
         });
 
         let commandeCrée = await newCommande.save();
-        if (clientDétails.length > 0) {
-            clientDétails[0].historique.push(commandeCrée.id);
-            await clientDétails[0].save();
-        }
-        const updatedStock = await stock.save();
 
-        res.status(201).json({ message: "La commande a été créée avec succès", commande: commandeCrée, stock: updatedStock});
+        // Ajouter la commande à l'historique du client
+        clientDétails.historique.push(commandeCrée.id);
+        await clientDétails.save();
+
+        res.status(201).json({
+            message: "La commande a été créée avec succès",
+            commande: commandeCrée,
+            stockRestant: produitsDetails.map(prod => ({ produit: prod.nom, stock: prod.stock }))
+        });
 
     } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
 }
-
 
 
 export async function getClientsCommande(req: Request, res: Response) {
@@ -123,11 +162,11 @@ export async function getClientsCommande(req: Request, res: Response) {
         }
         const commande: CommandesI | null = await Commandes.findById(commandesId);
         if (commande === null) {
-            res.status(404).send({ message: "playlist not found" })
+            res.status(404).send({ message: "Commande pas trouvée" })
             return
         }
         if (commande.clientId !== userId) {
-            res.status(401).send({ message: "you have no right to touch this playlist" })
+            res.status(401).send({ message: "Pas d'autorisation pour aller vers cette commande" })
             return
         }
         res.status(200).send({ message: 'commandes trouvées', commande, client})
