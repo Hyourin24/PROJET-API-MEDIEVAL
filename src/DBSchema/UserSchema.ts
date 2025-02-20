@@ -1,3 +1,4 @@
+
 import mongoose, { Document, Schema } from "mongoose"
 
 enum Role {
@@ -18,5 +19,6 @@ const UserSchema = new Schema({
     hashedPassword: { type: String, required: true },
     role: { type: String, enum: Object.values(Role), default: userRoles }
 })
+
 
 export default mongoose.model<UserI>('User', UserSchema);

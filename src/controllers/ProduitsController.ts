@@ -87,4 +87,3 @@ export async function deleteProduits(req: Request, res: Response) {
         res.status(500).json({ message: 'Erreur interne', error: err.message })
     }
 }
-

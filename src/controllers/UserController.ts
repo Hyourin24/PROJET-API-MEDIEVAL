@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import { hashPassword, verifyPassword } from '../utils/pwdUtils';
 import UserSchema, {UserI} from '../DBSchema/UserSchema';
 import { generateToken } from '../utils/JWTUtils';
+import { loginSchema, registerSchema } from '../JoiValidators/authValidators';
+import { validateSchema } from '../utils/joiUtils';
 
 export async function register(req:Request, res:Response){
     try{
-        const {name,password} = req.body;
+        const { name, password } = validateSchema(req, registerSchema);
         if(!name || !password ){
             res.status(400).send('Le champs name et password sont incomplets.');
             return 
@@ -30,8 +32,10 @@ export async function register(req:Request, res:Response){
 }
 
 export async function login(req:Request, res:Response){
-    const {name,password}=req.body;
+    
     try{
+        const { name, password } = validateSchema(req, loginSchema);
+        
          const user= await  UserSchema.findOne({name});
             if(!user){
                 res.status(404).json({message: 'Utilisateur non trouvé'});
