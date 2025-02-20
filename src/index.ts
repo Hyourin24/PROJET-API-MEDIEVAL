@@ -8,6 +8,7 @@ import ClientRoutes from "./routes/ClientRoutes";
 import DashboardRoutes from "./routes/DashboardRoutes";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from './config/swagger';
+import ExpressMongoSanitize from "express-mongo-sanitize";
 
 
 
@@ -36,6 +37,9 @@ const connectDB = async () => {
 
 
 connectDB();
+
+// Appliquer express-mongo-sanitize sur les requêtes entrantes
+app.use(ExpressMongoSanitize());
 
 //TODO ajouter routes ici
 app.use('/auth', UserRoutes)
