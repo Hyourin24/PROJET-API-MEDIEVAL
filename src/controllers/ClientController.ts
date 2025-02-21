@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
 
@@ -8,30 +7,16 @@ export async function createClient(req: Request, res: Response) {
     try {
     
         let { nom, adresse, email, historique, téléphone } = req.body;
-
-        if (!nom) {
-            res.status(400).send({ message: "nom requis" })
-            return
-        }
-
-
-        if (!adresse) {
-            res.status(404).send({ message: "adresse requise" })
-            return
-        }
-
-        if (!email) {
-            res.status(404).send({ message: "email requis" })
-            return
-        }
-
-        if (!téléphone) {
-            res.status(404).send({ message: "téléphone requis" })
+        
+        //Gestion des erreurs
+        if (!nom || !adresse || !email || !téléphone) {
+            res.status(400).send({ message: "Les champs nom, adresse, email et téléphone sont requis" })
             return
         }
         
+        //Générer le client
         const client: ClientsI = new Clients({ nom, adresse, email, historique, téléphone, actif: true});
-
+        //Sauvegarder le client dans la base de donnée
         const createdClient = await client.save()
 
         res.status(200).send({ message: "client créée avec succès", client: createdClient })
@@ -47,16 +32,17 @@ export async function modifyClient(req:Request, res: Response){
     try{
         const {id}= req.params; 
         const {nom, adresse, email, téléphone, actif} = req.body;
-          if(!id){
-            res.status(400).json({message:'ID requis'});
-            return
-          }
-      
+          //Erreur si l'id n'est pas fourni
+            if(!id){
+                res.status(400).json({message:'ID requis'});
+                return
+            }
+            //Recherche du client par son id et changement
             const updatedClient = await Clients.findByIdAndUpdate(
-            id, 
-            {completed:true}, 
-            {new:true, runValidators:true}
-        );
+                id, 
+                {completed:true}, 
+                {new:true, runValidators:true}
+            );
 
         const updatedClientData = {
             nom,
@@ -65,7 +51,7 @@ export async function modifyClient(req:Request, res: Response){
             téléphone
         };
         
-
+        
         if(!updatedClient){
             res.status(404).json({message:'Client non trouvé'});
             return
@@ -85,6 +71,7 @@ export async function modifyClient(req:Request, res: Response){
 
 export async function modifyClientActif(req:Request, res: Response){
     try{
+        //Recherche de l'id depuis le payload
         const userId = getUserIdFromPayload(req.headers.payload as string);
 
         const {id}= req.params; 
@@ -95,7 +82,7 @@ export async function modifyClientActif(req:Request, res: Response){
             res.status(400).json({message:'ID requis'});
             return
           }
-
+            //Recherche du client par son id et changement
         const updatedActif = await Clients.findByIdAndUpdate(
             id,
             {completed:true}, 
@@ -108,13 +95,6 @@ export async function modifyClientActif(req:Request, res: Response){
             res.status(404).json({message:'Actif requis'});
             return
         };
-
-        
-        //if ( user.role !== "Admin") {
-            //res.status(401).send({ message: "vous n'avez pas le droit de changer l'actif!" })
-            //return
-        //}
-
         res.status(200).json({message:'Actif mis à jour avec succès', data: updatedActifData});
     } catch(err:any)  {
 
@@ -145,6 +125,7 @@ export async function getAllClients(req: Request, res: Response) {
 
 export async function getAllActiveClients (req: Request, res: Response) {
     try{
+        //Tri de tous les clients pour prendre les actifs
         const client = await Clients.find({actif: "true"});
 
         res.status(200).send({message: "Liste des clients actifs" , client});
