@@ -1,18 +1,14 @@
-import UserSchema, { UserI } from '../DBSchema/UserSchema';
+
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
-import { compare } from 'bcryptjs';
-import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
-import exp from 'constants';
-import ProduitsSchema from '../DBSchema/ProduitsSchema';
 
-//Création des clients
+
+
 export async function createClient(req: Request, res: Response) {
     try {
-        // paramètres requis dans le body
+    
         let { nom, adresse, email, historique, téléphone } = req.body;
 
-       //Gestion des erreurs
         if (!nom) {
             res.status(400).send({ message: "nom requis" })
             return
