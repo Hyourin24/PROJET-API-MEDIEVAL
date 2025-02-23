@@ -9,7 +9,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: process.env.API_URL, // URL de votre API
+                url: process.env.API_URL, // URL de l'API
             },
         ],
     },

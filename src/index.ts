@@ -9,6 +9,7 @@ import DashboardRoutes from "./routes/DashboardRoutes";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from './config/swagger';
 import ExpressMongoSanitize from "express-mongo-sanitize";
+import cors from 'cors';
 
 
 
@@ -23,6 +24,9 @@ const PORT = process.env.PORT
 
 //COnfig du serveur par défaut
 app.use(express.json());
+
+// Active CORS pour toutes les origines
+app.use(cors());
 
 //connecter MongoDB
 const connectDB = async () => {
@@ -40,6 +44,8 @@ connectDB();
 
 // Appliquer express-mongo-sanitize sur les requêtes entrantes
 app.use(ExpressMongoSanitize());
+
+
 
 //TODO ajouter routes ici
 app.use('/auth', UserRoutes)
