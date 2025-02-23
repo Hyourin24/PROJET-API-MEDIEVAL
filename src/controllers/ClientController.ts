@@ -1,10 +1,6 @@
-import UserSchema, { UserI } from '../DBSchema/UserSchema';
 import { Request, Response } from "express";
 import Clients, { ClientsI } from "../DBSchema/ClientsSchema";
-import { compare } from 'bcryptjs';
-import Commandes, { CommandesI } from '../DBSchema/CommandesSchema';
-import exp from 'constants';
-import ProduitsSchema from '../DBSchema/ProduitsSchema';
+
 
 
 export async function createClient(req: Request, res: Response) {

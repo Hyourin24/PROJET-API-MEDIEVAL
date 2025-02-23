@@ -30,18 +30,18 @@ export async function createCommande(req: Request, res: Response): Promise<void>
         // Récupération des produits et des clients
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
         const clientDétails = await Clients.find({ _id: client });
-        let produitsStock: number[] = produitsDetails.map((produit: any) => produit.stock);
-        
-        // Mise à jour du stock
-        for (let i = 0; i < produitsStock[i]; i++) {
-            if (produitsStock < quantités[i]) {
-                res.status(400).send({ message: `Stock insuffisant pour le produit ${produitsDetails[i].nom}` });
+        // // let produitsStock: number[] = produitsDetails.map((produit: any) => produit.stock);
+       
+        for (let i = 0; i < produitsDetails.length; i++) {
+            if (produitsDetails[i].stock < quantités[i]) {
+                res.status(400).json({ message: `Stock insuffisant pour le produit: ${produitsDetails[i].nom} (Stock: ${produitsDetails[i].stock}, Requis: ${quantités[i]})` });
                 return;
             }
-            produitsStock[i] -= quantités[i];
-            await Produits.findByIdAndUpdate(produitsDetails[i]._id, { stock: produitsStock[i] });
+
+            produitsDetails[i].stock = (produitsDetails[i].stock as number) - quantités[i];
+            await produitsDetails[i].save();
         }
-        // Calcul du montant total
+        // // Calcul du montant total
         const montant = prixUnitaire.reduce((acc: number, prix: number) => acc + prix, 0);
 
         // Création de la commande

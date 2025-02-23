@@ -14,9 +14,9 @@ export interface CommandesI extends Document {
     client: String[];
     status: Status;
     produitsAssociés: String[];
-    quantités: Number;
+    quantités: Number[];
     prixUnitaire: Number[];
-    montantTotal: Number
+    montantTotal: number
 }
 
 const CommandesSchema = new Schema({
@@ -26,7 +26,7 @@ const CommandesSchema = new Schema({
     client: { type: [String], required: true},
     status: { type: String, enum: Object.values(Status), default: commandesStatus },
     produitsAssociés: { type: [String], required: true },
-    quantités: { type: Number},
+    quantités: { type: [Number], required: true},
     prixUnitaire: { type: [Number], required: true },
     montantTotal: { type: Number }
 })
