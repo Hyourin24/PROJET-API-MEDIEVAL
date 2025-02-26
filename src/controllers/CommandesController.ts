@@ -30,8 +30,8 @@ export async function createCommande(req: Request, res: Response): Promise<void>
         // Récupération des produits et des clients
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
         const clientDétails = await Clients.find({ _id: client });
-        // // let produitsStock: number[] = produitsDetails.map((produit: any) => produit.stock);
-       
+        
+        // Mise à jour du stock avec une boucle lors d'une commande
         for (let i = 0; i < produitsDetails.length; i++) {
             if (produitsDetails[i].stock < quantités[i]) {
                 res.status(400).json({ message: `Stock insuffisant pour le produit: ${produitsDetails[i].nom} (Stock: ${produitsDetails[i].stock}, Requis: ${quantités[i]})` });
