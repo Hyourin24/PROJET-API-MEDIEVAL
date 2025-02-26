@@ -165,7 +165,7 @@ import { verifyTokenMiddleware } from "../middlewares/verifyTokenMiddleware";
 // Modify Produit route
 /**
  * @swagger
- * /produits/modify/{id}:
+ * /produits/put/{id}:
  *   put:
  *     summary: Modify an existing product
  *     tags: [Produits]

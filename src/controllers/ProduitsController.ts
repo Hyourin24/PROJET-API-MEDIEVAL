@@ -45,6 +45,10 @@ export async function modifyProduit(req: Request, res: Response) {
         if (!nom || !description || !stock) {
             res.status(400).json({ message: 'Les champds doivent être modifiés' })
         }
+
+        if (stock <= 0 || !Number.isInteger(stock)) {
+            res.status(400).send({ message: "Le stock doit être un nombre entier positif et supérieur à 0" })
+        }
         //Mise à jour des champs
         const updatedUser = await Produits.findByIdAndUpdate(
             id, //ID de l'utilisateur à mettre à jour
@@ -67,7 +71,26 @@ export async function modifyProduit(req: Request, res: Response) {
     }
 }
 
-export async function deleteProduits(req: Request, res: Response) {
+export async function deleteProduits(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params; 
+
+        // Suppression du produit
+        const deletedProduct = await Produits.findByIdAndDelete(id);
+
+        if (!deletedProduct) {
+           res.status(404).json({ message: 'Produit non trouvé' });
+           return
+        }
+
+        res.status(200).json({ message: 'Produit effacé avec succès', deletedProduct });
+
+    } catch (err: any) {
+        res.status(500).json({ message: 'Erreur interne', error: err.message });
+    }
+}
+
+/*export async function deleteProduits(req: Request, res: Response) {
     try {
         const { id } = req.params; 
         const { nom, description, stock } = req.body;
@@ -90,4 +113,4 @@ export async function deleteProduits(req: Request, res: Response) {
     } catch (err: any) {
         res.status(500).json({ message: 'Erreur interne', error: err.message })
     }
-}
+} */
