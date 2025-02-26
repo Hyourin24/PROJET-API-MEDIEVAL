@@ -12,6 +12,10 @@ export async function createProduit(req: Request, res: Response) {
             res.status(400).send({ message: "Tous les champs doivent être complets" })
         }
 
+        if (stock <= 0 || !Number.isInteger(stock)) {
+            res.status(400).send({ message: "Le stock doit être un nombre entier positif et supérieur à 0" })
+        }
+
         const newProduit: ProduitsI = new ProduitsSchema ({
             nom, 
             description,
