@@ -30,8 +30,8 @@ export async function createCommande(req: Request, res: Response): Promise<void>
         // Récupération des produits et des clients
         const produitsDetails = await Produits.find({ _id: { $in: produitsAssociés } });
         const clientDétails = await Clients.find({ _id: client });
-        
-        // Mise à jour du stock avec une boucle lors d'une commande
+        // // let produitsStock: number[] = produitsDetails.map((produit: any) => produit.stock);
+       
         for (let i = 0; i < produitsDetails.length; i++) {
             if (produitsDetails[i].stock < quantités[i]) {
                 res.status(400).json({ message: `Stock insuffisant pour le produit: ${produitsDetails[i].nom} (Stock: ${produitsDetails[i].stock}, Requis: ${quantités[i]})` });
@@ -42,7 +42,7 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             await produitsDetails[i].save();
         }
         // // Calcul du montant total
-        const montant = prixUnitaire.reduce((acc: number, prix: number) => acc + prix, 0);
+        const montant = prixUnitaire.reduce((acc: number, prix: number, i: number) => acc + (prix * quantités[i]), 0);
 
         // Création de la commande
         const creationDate = new Date();
@@ -54,7 +54,7 @@ export async function createCommande(req: Request, res: Response): Promise<void>
             produitsAssociés: produitsDetails.map(prod => prod._id),
             quantités,
             prixUnitaire,
-            montantTotal: montant
+            montantTotal: montant,
         });
         
         //Sauvegarde de la commande
@@ -157,35 +157,50 @@ export async function modifyCancelStatus(req: Request, res: Response): Promise<v
         const commandeId = req.params.id;
         const commande = await Commandes.findById(commandeId);
         
-        //Message d'erreur si la commande n'existe pas
+        // Message d'erreur si la commande n'existe pas
         if (!commande) {
             res.status(404).json({ message: "Commande introuvable" });
             return;
         }
         
-        //Reprise du statut actuel et création du nouveau statut
-        const { status } = commande; 
-        let actualStatus: string = status
+        // Reprise du statut actuel et création du nouveau statut
+        const { status, produitsAssociés, quantités } = commande; 
+        let actualStatus: string = status;
         let newStatus: string = "";
-        
-        //Mise en place des conditions pour le statut annulé
-        if (actualStatus == "En attente" || actualStatus === "Expédiée" || actualStatus === "Livrée") {
+
+        // Vérification du statut actuel
+        if (actualStatus === "En attente" || actualStatus === "Expédiée" || actualStatus === "Livrée") {
             newStatus = "Annulée";
-        } else if (actualStatus == "Annulée") {
+        } else if (actualStatus === "Annulée") {
             res.status(400).json({ message: "Le statut est déjà annulé, débile" });
             return;
         } else {
             res.status(400).json({ message: "Status inconnu ou invalide" });
             return;
         }
+
+        // Mise à jour du statut de la commande
         const updatedCommande = await Commandes.findByIdAndUpdate(
             commandeId,
             { status: newStatus },
             { new: true }
         );
 
-        res.status(200).json({message: "Statut mis à jour avec succès", commande: updatedCommande});
+        // Réinitialisation des stocks des produits associés
+        for (let i = 0; i < produitsAssociés.length; i++) {
+            let produitId = produitsAssociés[i];
+            let quantite = Number(quantités[i]);
 
+            let produit = await Produits.findById(produitId);
+            if (!produit) {
+                res.status(400).json({ message: "Pas trouvé" });
+                continue;
+            }
+
+            produit.stock = Number(produit.stock) + quantite;
+            await produit.save();
+        }
+        res.status(200).json({message: "Statut mis à jour avec succès et stock réinitialisé", commande: updatedCommande});
     } catch (err: any) {
         res.status(500).json({ message: "Erreur interne", error: err.message });
     }
