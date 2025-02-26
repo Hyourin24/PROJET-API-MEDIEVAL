@@ -90,27 +90,3 @@ export async function deleteProduits(req: Request, res: Response): Promise<void>
     }
 }
 
-/*export async function deleteProduits(req: Request, res: Response) {
-    try {
-        const { id } = req.params; 
-        const { nom, description, stock } = req.body;
-        //Mise à jour des champs
-        const deletedUser = await Produits.findByIdAndDelete(
-            id, //ID de l'utilisateur à mettre à jour
-            { completed: true}, //Champs à changer
-        ) 
-
-        if (!deletedUser) {
-            res.status(404).json({ message: 'Produit non trouvé' })
-            return
-        }
-        deletedUser.nom = nom;
-        deletedUser.description = description;
-        deletedUser.stock = stock;
-        const ProduitModifié = await deletedUser.save();
-        res.status(200).json({ message: 'Produit effacé avec succès', updatedUser: ProduitModifié })
-
-    } catch (err: any) {
-        res.status(500).json({ message: 'Erreur interne', error: err.message })
-    }
-} */
